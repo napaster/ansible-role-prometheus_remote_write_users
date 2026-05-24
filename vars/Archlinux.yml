@@ -1,0 +1,5 @@
+---
+prometheus_remote_write_users_packages:
+  - 'apache'
+  - 'python-passlib'
+

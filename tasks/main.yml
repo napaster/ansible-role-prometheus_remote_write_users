@@ -1,0 +1,65 @@
+---
+- name: "prometheus_remote_write_users | Assert that ansible facts gathered successfully"
+  ansible.builtin.assert:
+    that:
+      - "hostvars[inventory_hostname]['ansible_facts']['os_family'] is defined"
+    fail_msg: "'ansible_facts' not found. Please enable facts gathering"
+    quiet: "true"
+
+- name: "prometheus_remote_write_users | Add the OS specific variables"
+  ansible.builtin.include_vars:
+    file: "{{ hostvars[inventory_hostname]['ansible_facts']['os_family'] + '.yml' }}"
+
+- name: "prometheus_remote_write_users | Install htpasswd dependencies"
+  ansible.builtin.package:
+    name: "{{ hostvars[inventory_hostname]['prometheus_remote_write_users_packages'] }}"
+    state: "present"
+  when:
+    - "hostvars[inventory_hostname]['prometheus_remote_write_users'] is defined"
+    - "hostvars[inventory_hostname]['prometheus_remote_write_users']
+      not in ['', [], '[]', None]"
+
+- name: "prometheus_remote_write_users | Ensure htpasswd files exist"
+  ansible.builtin.file:
+    path: "{{ item['path'] }}"
+    state: "touch"
+    owner: "{{ item['owner'] | default('root') }}"
+    group: "{{ item['group'] | default('root') }}"
+    mode: "{{ item['mode'] | default('0640') }}"
+  loop: "{{ hostvars[inventory_hostname]['prometheus_remote_write_users'] }}"
+  loop_control:
+    label: "{{ item['path'] }}"
+  when:
+    - "hostvars[inventory_hostname]['prometheus_remote_write_users'] is defined"
+    - "hostvars[inventory_hostname]['prometheus_remote_write_users']
+      not in ['', [], '[]', None]"
+
+- name: "prometheus_remote_write_users | Manage htpasswd users"
+  community.general.htpasswd:
+    path: "{{ item['path'] }}"
+    name: "{{ item['name'] }}"
+    password: "{{ item['password'] }}"
+    crypt_scheme: "bcrypt"
+    owner: "{{ item['owner'] | default('root') }}"
+    group: "{{ item['group'] | default('root') }}"
+    mode: "{{ item['mode'] | default('0640') }}"
+  loop: "{{ hostvars[inventory_hostname]['prometheus_remote_write_users'] }}"
+  loop_control:
+    label: "{{ item['name'] }}"
+  no_log: true
+  when:
+    - "hostvars[inventory_hostname]['prometheus_remote_write_users'] is defined"
+    - "hostvars[inventory_hostname]['prometheus_remote_write_users']
+      not in ['', [], '[]', None]"
+  notify:
+    - "Reload nginx"
+
+- name: "prometheus_remote_write_users | Validate nginx configuration"
+  ansible.builtin.command:
+    cmd: "nginx -t"
+  changed_when: false
+  when:
+    - "hostvars[inventory_hostname]['prometheus_remote_write_users'] is defined"
+    - "hostvars[inventory_hostname]['prometheus_remote_write_users']
+      not in ['', [], '[]', None]"
+

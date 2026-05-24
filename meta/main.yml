@@ -1,0 +1,19 @@
+---
+galaxy_info:
+  role_name: "prometheus_remote_write_users"
+  namespace: "none"
+  author: "Denis Pershev <dpershev@napaster.ru>"
+  description: "Manage nginx htpasswd users for Prometheus remote write"
+  license: "GPL"
+  min_ansible_version: "3.0.0"
+  platforms:
+    - name: "ArchLinux"
+      versions:
+        - 'all'
+    - name: "Debian"
+      versions:
+        - 'all'
+    - name: "EL"
+      versions:
+        - 'all'
+dependencies: []

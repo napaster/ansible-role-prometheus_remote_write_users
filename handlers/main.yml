@@ -1,0 +1,7 @@
+---
+- name: "prometheus_remote_write_users | Reload nginx"
+  ansible.builtin.systemd:
+    name: "nginx"
+    state: "reloaded"
+  listen: "Reload nginx"
+
