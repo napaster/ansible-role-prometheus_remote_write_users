@@ -39,7 +39,7 @@
     path: "{{ item['path'] }}"
     name: "{{ item['name'] }}"
     password: "{{ item['password'] }}"
-    crypt_scheme: "bcrypt"
+    crypt_scheme: "apr_md5_crypt"
     owner: "{{ item['owner'] | default('root') }}"
     group: "{{ item['group'] | default('root') }}"
     mode: "{{ item['mode'] | default('0640') }}"
